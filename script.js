@@ -49,6 +49,30 @@ class Rook extends Piece {
     }
 }
 
+class Knight extends Piece {
+    constructor(color, row, col) {
+        super("R", color, "assets/" + (color === "W" ? "w_knight" : "b_knight") + ".svg", row, col);
+    }
+}
+
+class Bishop extends Piece {
+    constructor(color, row, col) {
+        super("B", color, "assets/" + (color === "W" ? "w_bishop" : "b_bishop") + ".svg", row, col);
+    }
+}
+
+class Queen extends Piece {
+    constructor(color, row, col) {
+        super("Q", color, "assets/" + (color === "W" ? "w_queen" : "b_queen") + ".svg", row, col);
+    }
+}
+
+class King extends Piece {
+    constructor(color, row, col) {
+        super("K", color, "assets/" + (color === "W" ? "w_king" : "b_king") + ".svg", row, col);
+    }
+}
+
 let draggedPiece = null;
 let prevDragOverCell = null;
 document.addEventListener("DOMContentLoaded", () => {
@@ -72,28 +96,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function initializePieces() {
-        pieces.push(new Rook("W", 0, 0));
-        // pieces.push(new Knight("W", 0, 1));
-        // pieces.push(new Bishop("W", 0, 2));
-        // pieces.push(new Queen("W", 0, 3));
-        // pieces.push(new King("W", 0, 4));
-        // pieces.push(new Bishop("W", 0, 5));
-        // pieces.push(new Knight("W", 0, 6));
-        pieces.push(new Rook("W", 0, 7));
+        pieces.push(new Rook("B", 0, 0));
+        pieces.push(new Knight("B", 0, 1));
+        pieces.push(new Bishop("B", 0, 2));
+        pieces.push(new Queen("B", 0, 3));
+        pieces.push(new King("B", 0, 4));
+        pieces.push(new Bishop("B", 0, 5));
+        pieces.push(new Knight("B", 0, 6));
+        pieces.push(new Rook("B", 0, 7));
         for (let i = 0; i < 8; i++) {
-            pieces.push(new Pawn("W", 1, i));
+            pieces.push(new Pawn("B", 1, i));
         }
 
-        pieces.push(new Rook("B", 7, 0));
-        // pieces.push(new Knight("B", 7, 1));
-        // pieces.push(new Bishop("B", 7, 2));
-        // pieces.push(new Queen("B", 7, 3));
-        // pieces.push(new King("B", 7, 4));
-        // pieces.push(new Bishop("B", 7, 5));
-        // pieces.push(new Knight("B", 7, 6));
-        pieces.push(new Rook("B", 7, 7));
+        pieces.push(new Rook("W", 7, 0));
+        pieces.push(new Knight("W", 7, 1));
+        pieces.push(new Bishop("W", 7, 2));
+        pieces.push(new Queen("W", 7, 3));
+        pieces.push(new King("W", 7, 4));
+        pieces.push(new Bishop("W", 7, 5));
+        pieces.push(new Knight("W", 7, 6));
+        pieces.push(new Rook("W", 7, 7));
         for (let i = 0; i < 8; i++) {
-            pieces.push(new Pawn("B", 6, i));
+            pieces.push(new Pawn("W", 6, i));
         }
 
         pieces.forEach(piece => {
@@ -109,17 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleDragOver(event) {
         event.preventDefault();
-        const currentDragOverCell = this;
-        if (currentDragOverCell !== prevDragOverCell) {
-            const droppedRow = parseInt(this.dataset.row);
-            const droppedCol = parseInt(this.dataset.col);
-            if (draggedPiece && draggedPiece.canMoveTo(droppedRow, droppedCol)) {
-                event.dataTransfer.dropEffect = "none";
-            } else {
-                event.dataTransfer.dropEffect = "none";
-            }
-        }
-        prevDragOverCell = currentDragOverCell;
     }
 
     function handleDrop(event) {
