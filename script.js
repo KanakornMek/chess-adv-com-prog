@@ -18,6 +18,15 @@ class Piece {
         event.dataTransfer.setData("text/plain", null);
         event.dataTransfer.effectAllowed = 'move'
         draggedPiece = this
+        if (draggedPiece) {
+            let moves = draggedPiece.showAllowedMove();
+            moves.forEach((value) => {
+                const cell = getCell(value.row, value.col);
+                const moveableIcon = document.createElement("div");
+                moveableIcon.classList.add("moveable-icon");
+                cell.appendChild(moveableIcon);
+            })
+        }
     }
 
     moveTo(row, col) {
@@ -33,6 +42,16 @@ class Piece {
 
     canCaptureAt(row, col) {
         return true;
+    }
+
+    showAllowedMove() {
+        let allowedMoves = [];
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                allowedMoves.push({ row: i, col: j });
+            }
+        }
+        return allowedMoves;
     }
 }
 
@@ -75,9 +94,24 @@ class King extends Piece {
 
 let draggedPiece = null;
 let prevDragOverCell = null;
+
+function getCell(row, col) {
+    return document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
+}
+const pieces = [];
+let locations = [];
+
+function getAllPiecesLocation() {
+    let arr = [];
+    pieces.forEach(piece => {
+        arr.push({ type: piece.type, color: piece.color, row: piece.row, col: piece.col });
+    });
+    locations = arr;
+    console.log(locations)
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const board = document.getElementById("board");
-    const pieces = [];
 
     function createBoard() {
         for (let i = 0; i < 8; i++) {
@@ -139,17 +173,25 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         const droppedRow = parseInt(this.dataset.row);
         const droppedCol = parseInt(this.dataset.col);
-        console.log(droppedCol)
-        console.log(droppedRow)
         if (draggedPiece && draggedPiece.canMoveTo(droppedRow, droppedCol)) {
             draggedPiece.moveTo(droppedRow, droppedCol);
             this.appendChild(draggedPiece.element);
+            getAllPiecesLocation();
         }
+        if (draggedPiece && draggedPiece.canCaptureAt(droppedRow, droppedCol)) {
+            const cell = getCell(droppedRow, droppedCol);
+            cell.getElementsByClassName('piece')[0].remove();
+            cell.appendChild(draggedPiece.element);
+            getAllPiecesLocation();
+        }
+        draggedPiece = null;
+        const cells = document.querySelectorAll(".moveable-icon");
+        cells.forEach(cell => {
+            cell.remove();
+        });
     }
 
-    function getCell(row, col) {
-        return document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
-    }
+    
 
     createBoard();
     initializePieces();
