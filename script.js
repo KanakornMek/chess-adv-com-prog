@@ -65,6 +65,37 @@ class Piece {
 class Pawn extends Piece {
     constructor(color, row, col) {
         super("P", color, "assets/" + (color === "W" ? "w_pawn" : "b_pawn") + ".svg", row, col);
+        this.firstMove = true;
+    }
+
+    promote() {
+        return false;
+    }
+
+    showAllowedMove() {
+        let allowedMoves = [];
+        let moveRow = (this.color == "W" ? 1 : -1);
+        // capture
+        [-1,1].forEach( value => {
+            let newRow = this.row - moveRow;
+            let newCol = this.col + value;
+            console.log(getCell(newRow, newCol).querySelector(".piece"));
+            if (getCell(newRow, newCol).querySelector(".piece") != null && range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
+                allowedMoves.push({ row: newRow, col: newCol, capture: true });
+            }
+        });
+        // normal move
+        if (getCell(this.row - moveRow, this.col).querySelector(".piece") == null && range(0,8).includes(this.row - 1)) {
+            console.log(true);
+            allowedMoves.push({ row: this.row - moveRow, col: this.col, capture: false });
+        }
+        // first move
+        if (this.firstMove && getCell(this.row - (2 * moveRow), this.col).querySelector(".piece") == null && range(0,8).includes(this.row - (2 * moveRow))) {
+            allowedMoves.push({ row: this.row - (2 * moveRow), col: this.col, capture: false});
+            this.firstMove = false;
+        }
+        
+        return allowedMoves;
     }
 
 }
@@ -470,3 +501,11 @@ document.addEventListener("DOMContentLoaded", () => {
     createBoard();
     initializePieces();
 });
+
+function range(start, end) {
+    arr = []
+    for (let i = start; i < end; i++) {
+        arr.push(i);
+    }
+    return arr;
+}
