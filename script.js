@@ -66,11 +66,80 @@ class Rook extends Piece {
     constructor(color, row, col) {
         super("R", color, "assets/" + (color === "W" ? "w_rook" : "b_rook") + ".svg", row, col);
     }
+    showAllowedMove(){
+        let allowedMoves = [];
+        for (let i = this.row + 1; i < 8; i++){
+            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: i, col: this.col, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: i, col: this.col, capture: true });
+                break;
+            }
+        }
+        for (let i = this.row - 1; i >= 0; i--){
+            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: i, col: this.col, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: i, col: this.col, capture: true });
+                break;
+            }
+        }
+        for (let i = this.col + 1; i < 8; i++){
+            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: this.row, col: i, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: this.row, col: i, capture: true });
+                break;
+            }
+        }
+        for (let i = this.col - 1; i >= 0; i--){
+            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: this.row, col: i, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: this.row, col: i, capture: true });
+                break;
+            }
+        }
+        console.log(allowedMoves);
+        return allowedMoves;
+    }
 }
 
 class Knight extends Piece {
     constructor(color, row, col) {
         super("R", color, "assets/" + (color === "W" ? "w_knight" : "b_knight") + ".svg", row, col);
+    }
+    showAllowedMove(){
+        let allowedMoves = [];
+        const knightMoves = [
+            { row: 1, col: 2 },
+            { row: 1, col: -2 },
+            { row: -1, col: 2 },
+            { row: -1, col: -2 },
+            { row: 2, col: 1 },
+            { row: 2, col: -1 },
+            { row: -2, col: 1 },
+            { row: -2, col: -1 }
+        ];
+        knightMoves.forEach(move =>{
+            const newRow = this.row + move.row;
+            const newCol = this.col + move.col;
+
+            if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8){
+                if (getCell(newRow, newCol).getElementsByClassName('piece').length == 0){
+                    allowedMoves.push({ row: newRow, col: newCol, capture: false });
+                }
+                else{
+                    allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                }
+            }
+        })
+        console.log(allowedMoves);
+        return allowedMoves;
     }
 }
 
@@ -78,11 +147,137 @@ class Bishop extends Piece {
     constructor(color, row, col) {
         super("B", color, "assets/" + (color === "W" ? "w_bishop" : "b_bishop") + ".svg", row, col);
     }
+    showAllowedMove(){
+        let allowedMoves = [];
+        for (let r = this.row + 1, c = this.col + 1; r < 8 && c < 8; r++){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c++;
+        }
+        for (let r = this.row + 1, c = this.col - 1; r < 8 && c >= 0; r++){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c--;
+        }
+        for (let r = this.row - 1, c = this.col + 1; r >= 0 && c < 8; r--){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c++;
+        }
+        for (let r = this.row - 1, c = this.col - 1; r >= 0 && c >= 0; r--){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c--;
+        }
+        console.log(allowedMoves);
+        return allowedMoves;
+    }
 }
 
 class Queen extends Piece {
     constructor(color, row, col) {
         super("Q", color, "assets/" + (color === "W" ? "w_queen" : "b_queen") + ".svg", row, col);
+    }
+    showAllowedMove(){
+        let allowedMoves = [];
+        for (let i = this.row + 1; i < 8; i++){
+            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: i, col: this.col, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: i, col: this.col, capture: true });
+                break;
+            }
+        }
+        for (let i = this.row - 1; i >= 0; i--){
+            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: i, col: this.col, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: i, col: this.col, capture: true });
+                break;
+            }
+        }
+        for (let i = this.col + 1; i < 8; i++){
+            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: this.row, col: i, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: this.row, col: i, capture: true });
+                break;
+            }
+        }
+        for (let i = this.col - 1; i >= 0; i--){
+            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: this.row, col: i, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: this.row, col: i, capture: true });
+                break;
+            }
+        }
+        for (let r = this.row + 1, c = this.col + 1; r < 8 && c < 8; r++){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c++;
+        }
+        for (let r = this.row + 1, c = this.col - 1; r < 8 && c >= 0; r++){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c--;
+        }
+        for (let r = this.row - 1, c = this.col + 1; r >= 0 && c < 8; r--){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c++;
+        }
+        for (let r = this.row - 1, c = this.col - 1; r >= 0 && c >= 0; r--){
+            if (getCell(r, c).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: r, col: c, capture: false });
+            }
+            else{
+                allowedMoves.push({ row: r, col: c, capture: true });
+                break;
+            }
+            c--;
+        }
+        console.log(allowedMoves);
+        return allowedMoves;
     }
 }
 
