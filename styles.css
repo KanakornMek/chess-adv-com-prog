@@ -25,3 +25,12 @@
     background-color: gray;
     position: absolute;
 }
+
+.captureable-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 5px solid gray;
+    position: absolute;
+}
