@@ -76,25 +76,28 @@ class Pawn extends Piece {
         let allowedMoves = [];
         let moveRow = (this.color == "W" ? 1 : -1);
         // capture
-        [-1,1].forEach( value => {
-            let newRow = this.row - moveRow;
-            let newCol = this.col + value;
-            console.log(getCell(newRow, newCol).querySelector(".piece"));
-            if (getCell(newRow, newCol).querySelector(".piece") != null && range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
-                allowedMoves.push({ row: newRow, col: newCol, capture: true });
+        for (let value of [-1, 1]) {
+            const newRow = this.row - moveRow;
+            const newCol = this.col + value;
+            if (range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
+                if (getCell(newRow, newCol).getElementsByClassName("piece").length == 0) {
+                    // pass
+                } else if (getCell(newRow, newCol).getElementsByClassName("piece")[0].dataset.color != this.color) {
+                    allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                }
             }
-        });
+        };
         // normal move
-        if (getCell(this.row - moveRow, this.col).querySelector(".piece") == null && range(0,8).includes(this.row - 1)) {
-            console.log(true);
-            allowedMoves.push({ row: this.row - moveRow, col: this.col, capture: false });
+        if (range(0,8).includes(this.row - 1)) {
+            if (getCell(this.row - moveRow, this.col).getElementsByClassName("piece").length == 0) {
+                // first move
+                if (this.firstMove && getCell(this.row - (2 * moveRow), this.col).getElementsByClassName("piece").length == 0) {
+                    allowedMoves.push({ row: this.row - (2 * moveRow), col: this.col, capture: false});
+                    this.firstMove = false;
+                }
+                allowedMoves.push({ row: this.row - moveRow, col: this.col, capture: false });
+            }
         }
-        // first move
-        if (this.firstMove && getCell(this.row - (2 * moveRow), this.col).querySelector(".piece") == null && range(0,8).includes(this.row - (2 * moveRow))) {
-            allowedMoves.push({ row: this.row - (2 * moveRow), col: this.col, capture: false});
-            this.firstMove = false;
-        }
-        
         return allowedMoves;
     }
 
@@ -166,7 +169,7 @@ class Rook extends Piece {
 
 class Knight extends Piece {
     constructor(color, row, col) {
-        super("R", color, "assets/" + (color === "W" ? "w_knight" : "b_knight") + ".svg", row, col);
+        super("N", color, "assets/" + (color === "W" ? "w_knight" : "b_knight") + ".svg", row, col);
     }
     showAllowedMove(){
         let allowedMoves = [];
@@ -389,6 +392,37 @@ class Queen extends Piece {
 class King extends Piece {
     constructor(color, row, col) {
         super("K", color, "assets/" + (color === "W" ? "w_king" : "b_king") + ".svg", row, col);
+        this.moveInCheck = false;
+    }
+
+    showAllowedMove() {
+        let allowedMoves = [];
+        const kingMoves = [
+            {row: 1, col: 1},
+            {row: 0, col: 1},
+            {row: -1, col: 1},
+            {row: 1, col: 0},
+            {row: -1, col: 0},
+            {row: 1, col: -1},
+            {row: 0, col: -1},
+            {row: -1, col: -1},
+        ]
+
+        for (let i = 0; i < kingMoves.length; i++) {
+            let move = kingMoves[i];
+            let newRow = this.row + move.row;
+            let newCol = this.col + move.col;
+            if (range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
+                if (!cellInCheck(newRow, newCol, this.color)) {
+                    if (getCell(newRow, newCol).getElementsByClassName("piece").length == 0) {
+                        allowedMoves.push({row: newRow, col: newCol, capture: false});
+                    } else if (getCell(newRow, newCol).getElementsByClassName("piece")[0].dataset.color != this.color) {
+                        allowedMoves.push({row: newRow, col: newCol, capture: true});
+                    }
+                }
+            }
+        }
+        return allowedMoves;
     }
 }
 
@@ -508,4 +542,211 @@ function range(start, end) {
         arr.push(i);
     }
     return arr;
+}
+
+function cellInCheck(row, col, kingColor) {
+        
+    // check Knight
+    const knightMoves = [
+        { row: 1, col: 2 },
+        { row: 1, col: -2 },
+        { row: -1, col: 2 },
+        { row: -1, col: -2 },
+        { row: 2, col: 1 },
+        { row: 2, col: -1 },
+        { row: -2, col: 1 },
+        { row: -2, col: -1 }
+    ];
+
+    for (let i = 0; i < knightMoves.length; i++){
+        let move = knightMoves[i];
+        let newRow = row + move.row;
+        let newCol = col + move.col;
+        if (range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
+            if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                let knightPiece = getCell(newRow, newCol).getElementsByClassName("piece");
+                if (knightPiece[0].dataset.type == "N" && knightPiece[0].dataset.color != kingColor) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    // check for King of another color
+    const kingMoves = [
+        {row: 1, col: 1},
+        {row: 0, col: 1},
+        {row: -1, col: 1},
+        {row: 1, col: 0},
+        {row: -1, col: 0},
+        {row: 1, col: -1},
+        {row: 0, col: -1},
+        {row: -1, col: -1},
+    ]
+
+    for (let i = 0; i < kingMoves.length; i++) {
+        let move = kingMoves[i];
+        let newRow = row + move.row;
+        let newCol = col + move.col;
+        if (range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
+            if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                let kingPiece = getCell(newRow, newCol).getElementsByClassName("piece");
+                if (kingPiece[0].dataset.type == "K" && kingPiece[0].dataset.color != kingColor) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    let leftCol = range(0,col);
+    let rightCol = range(col+1,8);
+    let upRow = range(0,row);
+    let downRow = range(row+1,8);
+
+    // check horizontal left cell: Rook and Queen
+    for (let i = leftCol.length-1; i >= 0; i--) {
+        let pieceInWay = getCell(row, leftCol[i]).getElementsByClassName("piece");
+        if (pieceInWay.length != 0) {
+            if (pieceInWay[0].dataset.color == kingColor) {
+                break;
+            } else if (["N","P","B"].includes(pieceInWay[0].dataset.type)) {
+                break;
+            } else if (["Q","R"].includes(pieceInWay[0].dataset.type)) {
+                return true;
+            }
+        }
+    }
+
+    for (let i = 0; i < rightCol.length; i++) {
+        let pieceInWay = getCell(row, rightCol[i]).getElementsByClassName("piece");
+        if (pieceInWay.length != 0) {
+            if (pieceInWay[0].dataset.color == kingColor) {
+                break;
+            } else if (["N","P","B"].includes(pieceInWay[0].dataset.type)) {
+                break;
+            } else if (["Q","R"].includes(pieceInWay[0].dataset.type)) {
+                return true;
+            }
+        }
+    }
+
+    for (let i = upRow.length-1; i >= 0; i--) {
+        let pieceInWay = getCell(upRow[i], col).getElementsByClassName("piece");
+        if (pieceInWay.length != 0) {
+            if (pieceInWay[0].dataset.color == kingColor) {
+                break;
+            } else if (["N","P","B"].includes(pieceInWay[0].dataset.type)) {
+                break;
+            } else if (["Q","R"].includes(pieceInWay[0].dataset.type)) {
+                return true;
+            }
+        }
+    }
+
+    for (let i = 0; i < downRow.length; i++) {
+        let pieceInWay = getCell(downRow[i], col).getElementsByClassName("piece");
+        if (pieceInWay.length != 0) {
+            if (pieceInWay[0].dataset.color == kingColor) {
+                break;
+            } else if (["N","P","B"].includes(pieceInWay[0].dataset.type)) {
+                break;
+            } else if (["Q","R"].includes(pieceInWay[0].dataset.type)) {
+                return true;
+            }
+        }
+    }
+
+    // check quadrant 1 for Bishop and Queen
+    for (let i = 1; i < 8; i++) {
+        let newCol = col + i;
+        let newRow = row + i;
+        if (newCol < 8 && newRow < 8) {
+            if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
+                if (pieceInWay[0].dataset.color == kingColor) {
+                    break;
+                } else if (["N","P","R"].includes(pieceInWay[0].dataset.type)) {
+                    break;
+                } else if (["Q","B"].includes(pieceInWay[0].dataset.type)) {
+                    return true;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+
+    for (let i = 1; i < 8; i++) {
+        let newCol = col + i;
+        let newRow = row - i;
+        if (newCol < 8 && newRow >= 0) {
+            if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
+                if (pieceInWay[0].dataset.color == kingColor) {
+                    break;
+                } else if (["N","P","R"].includes(pieceInWay[0].dataset.type)) {
+                    break;
+                } else if (["Q","B"].includes(pieceInWay[0].dataset.type)) {
+                    return true;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+
+    for (let i = 1; i < 8; i++) {
+        let newCol = col - i;
+        let newRow = row + i;
+        if (newCol >= 0 && newRow < 8) {
+            if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
+                if (pieceInWay[0].dataset.color == kingColor) {
+                    break;
+                } else if (["N","P","R"].includes(pieceInWay[0].dataset.type)) {
+                    break;
+                } else if (["Q","B"].includes(pieceInWay[0].dataset.type)) {
+                    return true;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+
+    for (let i = 1; i < 8; i++) {
+        let newCol = col - i;
+        let newRow = row - i;
+        if (newCol >= 0 && newRow >= 0) {
+            if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
+                if (pieceInWay[0].dataset.color == kingColor) {
+                    break;
+                } else if (["N","P","R"].includes(pieceInWay[0].dataset.type)) {
+                    break;
+                } else if (["Q","B"].includes(pieceInWay[0].dataset.type)) {
+                    return true;
+                }
+            }
+        } else {
+            break;
+        }
+    }
+
+
+    // check Pawn
+    let moveRow = (kingColor == "W" ? 1 : -1);
+    for (value of [-1,1]) {
+        let newRow = row - moveRow;
+        let newCol = col + value;
+        if (range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
+            if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                let bePawn = getCell(newRow, newCol).getElementsByClassName("piece");
+                if (bePawn[0].dataset.type == "P" && bePawn[0].dataset.color != kingColor) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
