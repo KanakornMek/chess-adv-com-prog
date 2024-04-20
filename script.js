@@ -25,8 +25,13 @@ class Piece {
             moves.forEach((value) => {
                 const cell = getCell(value.row, value.col);
                 const moveableIcon = document.createElement("div");
-                moveableIcon.classList.add("moveable-icon");
+                if(value.capture === true) {
+                    moveableIcon.classList.add("captureable-icon");
+                } else {
+                    moveableIcon.classList.add("moveable-icon");
+                }
                 cell.appendChild(moveableIcon);
+
             })
         }
     }
@@ -449,7 +454,12 @@ document.addEventListener("DOMContentLoaded", () => {
             getAllPiecesLocation();
         }
         draggedPiece = null;
-        const cells = document.querySelectorAll(".moveable-icon");
+        let cells = document.querySelectorAll(".moveable-icon");
+        cells.forEach(cell => {
+            cell.remove();
+        });
+
+        cells = document.querySelectorAll(".captureable-icon");
         cells.forEach(cell => {
             cell.remove();
         });
