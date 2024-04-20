@@ -8,6 +8,8 @@ class Piece {
         this.element = document.createElement("img");
         this.element.classList.add("piece");
         this.element.src = icon
+        this.element.dataset.color = color;
+        this.element.dataset.type = type;
         this.element.dataset.row = row;
         this.element.dataset.col = col;
         this.element.draggable = true;
@@ -73,8 +75,12 @@ class Rook extends Piece {
                 allowedMoves.push({ row: i, col: this.col, capture: false });
             }
             else{
-                allowedMoves.push({ row: i, col: this.col, capture: true });
-                break;
+                if (getCell(i, this.col).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: i, col: this.col, capture: true });
+                    break;
+                }
             }
         }
         for (let i = this.row - 1; i >= 0; i--){
@@ -82,8 +88,12 @@ class Rook extends Piece {
                 allowedMoves.push({ row: i, col: this.col, capture: false });
             }
             else{
-                allowedMoves.push({ row: i, col: this.col, capture: true });
-                break;
+                if (getCell(i, this.col).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: i, col: this.col, capture: true });
+                    break;
+                }
             }
         }
         for (let i = this.col + 1; i < 8; i++){
@@ -91,8 +101,12 @@ class Rook extends Piece {
                 allowedMoves.push({ row: this.row, col: i, capture: false });
             }
             else{
-                allowedMoves.push({ row: this.row, col: i, capture: true });
-                break;
+                if (getCell(this.row, i).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: this.row, col: i, capture: true });
+                    break;
+                }
             }
         }
         for (let i = this.col - 1; i >= 0; i--){
@@ -100,11 +114,16 @@ class Rook extends Piece {
                 allowedMoves.push({ row: this.row, col: i, capture: false });
             }
             else{
-                allowedMoves.push({ row: this.row, col: i, capture: true });
-                break;
+                if (getCell(this.row, i).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: this.row, col: i, capture: true });
+                    break;
+                }
             }
         }
         console.log(allowedMoves);
+        console.log(getCell(this.row, this.col).getElementsByClassName('piece')[0].dataset)
         return allowedMoves;
     }
 }
@@ -134,7 +153,9 @@ class Knight extends Piece {
                     allowedMoves.push({ row: newRow, col: newCol, capture: false });
                 }
                 else{
-                    allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                    if (getCell(newRow, newCol).getElementsByClassName('piece')[0].dataset.color == 'B'){
+                        allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                    }
                 }
             }
         })
@@ -154,8 +175,12 @@ class Bishop extends Piece {
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c++;
         }
@@ -164,8 +189,12 @@ class Bishop extends Piece {
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c--;
         }
@@ -174,8 +203,12 @@ class Bishop extends Piece {
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c++;
         }
@@ -184,8 +217,12 @@ class Bishop extends Piece {
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c--;
         }
@@ -200,49 +237,17 @@ class Queen extends Piece {
     }
     showAllowedMove(){
         let allowedMoves = [];
-        for (let i = this.row + 1; i < 8; i++){
-            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
-                allowedMoves.push({ row: i, col: this.col, capture: false });
-            }
-            else{
-                allowedMoves.push({ row: i, col: this.col, capture: true });
-                break;
-            }
-        }
-        for (let i = this.row - 1; i >= 0; i--){
-            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
-                allowedMoves.push({ row: i, col: this.col, capture: false });
-            }
-            else{
-                allowedMoves.push({ row: i, col: this.col, capture: true });
-                break;
-            }
-        }
-        for (let i = this.col + 1; i < 8; i++){
-            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
-                allowedMoves.push({ row: this.row, col: i, capture: false });
-            }
-            else{
-                allowedMoves.push({ row: this.row, col: i, capture: true });
-                break;
-            }
-        }
-        for (let i = this.col - 1; i >= 0; i--){
-            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
-                allowedMoves.push({ row: this.row, col: i, capture: false });
-            }
-            else{
-                allowedMoves.push({ row: this.row, col: i, capture: true });
-                break;
-            }
-        }
         for (let r = this.row + 1, c = this.col + 1; r < 8 && c < 8; r++){
             if (getCell(r, c).getElementsByClassName('piece').length == 0){
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c++;
         }
@@ -251,8 +256,12 @@ class Queen extends Piece {
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c--;
         }
@@ -261,8 +270,12 @@ class Queen extends Piece {
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c++;
         }
@@ -271,10 +284,66 @@ class Queen extends Piece {
                 allowedMoves.push({ row: r, col: c, capture: false });
             }
             else{
-                allowedMoves.push({ row: r, col: c, capture: true });
-                break;
+                if (getCell(r, c).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: r, col: c, capture: true });
+                    break;
+                }
             }
             c--;
+        }
+        for (let i = this.row + 1; i < 8; i++){
+            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: i, col: this.col, capture: false });
+            }
+            else{
+                if (getCell(i, this.col).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: i, col: this.col, capture: true });
+                    break;
+                }
+            }
+        }
+        for (let i = this.row - 1; i >= 0; i--){
+            if (getCell(i, this.col).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: i, col: this.col, capture: false });
+            }
+            else{
+                if (getCell(i, this.col).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: i, col: this.col, capture: true });
+                    break;
+                }
+            }
+        }
+        for (let i = this.col + 1; i < 8; i++){
+            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: this.row, col: i, capture: false });
+            }
+            else{
+                if (getCell(this.row, i).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: this.row, col: i, capture: true });
+                    break;
+                }
+            }
+        }
+        for (let i = this.col - 1; i >= 0; i--){
+            if (getCell(this.row, i).getElementsByClassName('piece').length == 0){
+                allowedMoves.push({ row: this.row, col: i, capture: false });
+            }
+            else{
+                if (getCell(this.row, i).getElementsByClassName('piece')[0].dataset.color == 'W'){
+                    break;
+                }else{
+                    allowedMoves.push({ row: this.row, col: i, capture: true });
+                    break;
+                }
+            }
         }
         console.log(allowedMoves);
         return allowedMoves;
