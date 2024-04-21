@@ -37,10 +37,13 @@ class Piece {
     }
 
     moveTo(row, col) {
-        this.row = row;
-        this.col = col;
-        this.element.dataset.row = row;
-        this.element.dataset.col = col;
+        if (row != this.row || col != this.col) {
+            enpassantPosition = {row: null, col: null};
+            this.row = row;
+            this.col = col;
+            this.element.dataset.row = row;
+            this.element.dataset.col = col;
+        }
     }
 
     canMoveTo(row, col) {
@@ -69,31 +72,55 @@ class Pawn extends Piece {
     }
 
     moveTo(row, col) {
-        if (row === (this.color === "W" ? 6 : 1)) {
-            this.firstMove = true;
+        if (row != this.row || col != this.col) {
+            if (row == enpassantPosition.row && col == enpassantPosition.col) {
+                getCell(row + (this.color == "W" ? 1 : -1), col).getElementsByClassName("piece")[0].remove();
+                enpassantPosition = {row: null, col: null};
+            } else if (row == (this.color == "W" ? 6 : 1) && this.firstMove == true) {
+                this.firstMove = true;
+            } else if (row == (this.color == "W" ? 4 : 3) && this.firstMove == true) {
+                this.firstMove = false;
+                enpassantPosition = {row: row - (this.color == "W" ? -1 : 1), col: col};
+            } else {
+                enpassantPosition = {row: null, col: null};
+                this.firstMove = false;
+            }
+            this.row = row;
+            this.col = col;
+            this.element.dataset.row = row;
+            this.element.dataset.col = col;
+            if (row == (this.color == "W" ? 0 : 7)) {
+                console.log(999)
+                this.promote();
+            }
         }
-        this.row = row;
-        this.col = col;
-        this.element.dataset.row = row;
-        this.element.dataset.col = col;
     }
 
     promote() {
-        return false;
+        draggedPiece = new Queen(this.color, this.row, this.col);
     }
 
     showAllowedMove() {
         let allowedMoves = [];
         let moveRow = (this.color == "W" ? 1 : -1);
+        // En passant
+        for (let value of [-1, 1]) {
+            const newRow = this.row - moveRow;
+            const newCol = this.col + value;
+            if (newRow == enpassantPosition.row && newCol == enpassantPosition.col) {
+                allowedMoves.push({ row: newRow, col: newCol, capture: true });
+            }
+        }
+        
         // capture
         for (let value of [-1, 1]) {
             const newRow = this.row - moveRow;
             const newCol = this.col + value;
             if (range(0,8).includes(newRow) && range(0,8).includes(newCol)) {
-                if (getCell(newRow, newCol).getElementsByClassName("piece").length == 0) {
-                    // pass
-                } else if (getCell(newRow, newCol).getElementsByClassName("piece")[0].dataset.color != this.color) {
-                    allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                if (getCell(newRow, newCol).getElementsByClassName("piece").length != 0) {
+                    if (getCell(newRow, newCol).getElementsByClassName("piece")[0].dataset.color != this.color) {
+                        allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                    }
                 }
             }
         };
@@ -103,7 +130,6 @@ class Pawn extends Piece {
                 // first move
                 if (this.firstMove && getCell(this.row - (2 * moveRow), this.col).getElementsByClassName("piece").length == 0) {
                     allowedMoves.push({ row: this.row - (2 * moveRow), col: this.col, capture: false});
-                    this.firstMove = false;
                 }
                 allowedMoves.push({ row: this.row - moveRow, col: this.col, capture: false });
             }
@@ -121,12 +147,15 @@ class Rook extends Piece {
     }
 
     moveTo(row, col) {
-        this.row = row;
-        this.col = col;
-        this.isMoved = true;
-        this.element.dataset.row = row;
-        this.element.dataset.col = col;
-        this.element.dataset.isMoved = true;
+        if (row != this.row || col != this.col) {
+            enpassantPosition = {row: null, col: null};
+            this.row = row;
+            this.col = col;
+            this.isMoved = true;
+            this.element.dataset.row = row;
+            this.element.dataset.col = col;
+            this.element.dataset.isMoved = true;
+        }
     }
 
     showAllowedMove(){
@@ -426,33 +455,40 @@ class King extends Piece {
     }
 
     moveTo(row, col) {
-        this.row = row;
-        this.col = col;
-        this.element.dataset.row = row;
-        this.element.dataset.col = col;
-        if (!this.isMoved && col == 2) {
-            let castle = this.getPiecebyRowCol(7,0)
-            if (castle.type == "R") {
-                if (castle.isMoved == false) {
-                    castle.isMoved = true;
-                    castle.element.dataset.isMoved = true;
-                    getCell(7,3).appendChild(castle.element);
-                    this.getPiecebyRowCol(7,0).moveTo(7,3);
+        if (row != this.row || col != this.col) {
+            enpassantPosition = {row: null, col: null};
+            this.row = row;
+            this.col = col;
+            this.element.dataset.row = row;
+            this.element.dataset.col = col;
+            if (!this.isMoved && col == 2) {
+                let castle = this.getPiecebyRowCol(7,0)
+                if (castle.type == "R") {
+                    if (castle.isMoved == false) {
+                        castle.isMoved = true;
+                        castle.element.dataset.isMoved = true;
+                        getCell(7,3).appendChild(castle.element);
+                        this.getPiecebyRowCol(7,0).moveTo(7,3);
+                    }
                 }
             }
-        }
-        if (!this.isMoved && col == 6) {
-            let castle = this.getPiecebyRowCol(7,7)
-            if (castle.type == "R") {
-                if (castle.isMoved == false) {
-                    castle.isMoved = true;
-                    castle.element.dataset.isMoved = true;
-                    getCell(7,5).appendChild(castle.element);
-                    this.getPiecebyRowCol(7,7).moveTo(7,5);
+            if (!this.isMoved && col == 6) {
+                let castle = this.getPiecebyRowCol(7,7)
+                if (castle.type == "R") {
+                    if (castle.isMoved == false) {
+                        castle.isMoved = true;
+                        castle.element.dataset.isMoved = true;
+                        getCell(7,5).appendChild(castle.element);
+                        this.getPiecebyRowCol(7,7).moveTo(7,5);
+                    }
                 }
             }
+            if (row == 7 && col == 4 && this.isMoved == false) {
+                this.isMoved = false;
+            } else {
+                this.isMoved = true;
+            }
         }
-        this.isMoved = true;
     }
 
     showAllowedMove() {
@@ -721,6 +757,7 @@ class King extends Piece {
 
 let draggedPiece = null;
 let prevDragOverCell = null;
+let enpassantPosition = {row: null, col: null};
 
 function getCell(row, col) {
     return document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
