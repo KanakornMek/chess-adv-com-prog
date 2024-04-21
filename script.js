@@ -68,6 +68,16 @@ class Pawn extends Piece {
         this.firstMove = true;
     }
 
+    moveTo(row, col) {
+        if (row === (this.color === "W" ? 6 : 1)) {
+            this.firstMove = true;
+        }
+        this.row = row;
+        this.col = col;
+        this.element.dataset.row = row;
+        this.element.dataset.col = col;
+    }
+
     promote() {
         return false;
     }
@@ -106,7 +116,19 @@ class Pawn extends Piece {
 class Rook extends Piece {
     constructor(color, row, col) {
         super("R", color, "assets/" + (color === "W" ? "w_rook" : "b_rook") + ".svg", row, col);
+        this.isMoved = false;
+        this.element.dataset.isMoved = false;
     }
+
+    moveTo(row, col) {
+        this.row = row;
+        this.col = col;
+        this.isMoved = true;
+        this.element.dataset.row = row;
+        this.element.dataset.col = col;
+        this.element.dataset.isMoved = true;
+    }
+
     showAllowedMove(){
         let allowedMoves = [];
         for (let i = this.row + 1; i < 8; i++){
@@ -392,11 +414,74 @@ class Queen extends Piece {
 class King extends Piece {
     constructor(color, row, col) {
         super("K", color, "assets/" + (color === "W" ? "w_king" : "b_king") + ".svg", row, col);
-        this.moveInCheck = false;
+        this.isMoved = false;
+    }
+
+    getPiecebyRowCol(row, col) {
+        for (let piece of pieces) {
+            if (piece.row == row && piece.col == col) {
+                return piece;
+            }
+        }
+    }
+
+    moveTo(row, col) {
+        this.row = row;
+        this.col = col;
+        this.element.dataset.row = row;
+        this.element.dataset.col = col;
+        if (!this.isMoved && col == 2) {
+            let castle = this.getPiecebyRowCol(7,0)
+            if (castle.type == "R") {
+                if (castle.isMoved == false) {
+                    castle.isMoved = true;
+                    castle.element.dataset.isMoved = true;
+                    getCell(7,3).appendChild(castle.element);
+                    this.getPiecebyRowCol(7,0).moveTo(7,3);
+                }
+            }
+        }
+        if (!this.isMoved && col == 6) {
+            let castle = this.getPiecebyRowCol(7,7)
+            if (castle.type == "R") {
+                if (castle.isMoved == false) {
+                    castle.isMoved = true;
+                    castle.element.dataset.isMoved = true;
+                    getCell(7,5).appendChild(castle.element);
+                    this.getPiecebyRowCol(7,7).moveTo(7,5);
+                }
+            }
+        }
+        this.isMoved = true;
     }
 
     showAllowedMove() {
         let allowedMoves = [];
+        if (!this.isMoved) {
+            if (getCell(7,0).getElementsByClassName("piece").length != 0) {
+                if (getCell(7,0).getElementsByClassName("piece")[0].dataset.type == "R") {
+                    if (getCell(7,0).getElementsByClassName("piece")[0].dataset.isMoved == "false") {
+                        if (getCell(7,1).getElementsByClassName("piece").length + getCell(7,2).getElementsByClassName("piece").length + getCell(7,3).getElementsByClassName("piece").length == 0) {
+                            if (!this.cellInCheck(7,2,"W") && !this.cellInCheck(7,3,"W") && !this.cellInCheck(7,4,"W")) {
+                                allowedMoves.push({ row: 7, col: 2, capture: false });
+                            }
+                        }
+                    }
+                }
+            }
+            if (getCell(7,7).getElementsByClassName("piece").length != 0) {
+                if (getCell(7,7).getElementsByClassName("piece")[0].dataset.type == "R") {
+                    if (getCell(7,7).getElementsByClassName("piece")[0].dataset.isMoved == "false") {
+                        if (getCell(7,5).getElementsByClassName("piece").length + getCell(7,6).getElementsByClassName("piece").length == 0) {
+                            if (!this.cellInCheck(7,4,"W") && !this.cellInCheck(7,5,"W") && !this.cellInCheck(7,6,"W")) {
+                                allowedMoves.push({ row: 7, col: 6, capture: false });
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         const kingMoves = [
             {row: 1, col: 1},
             {row: 0, col: 1},
@@ -631,6 +716,7 @@ class King extends Piece {
         }
         return false;
     }
+    
 }
 
 let draggedPiece = null;
