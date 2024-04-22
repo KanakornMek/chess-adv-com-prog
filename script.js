@@ -47,11 +47,25 @@ class Piece {
     }
 
     canMoveTo(row, col) {
-        return true;
+        let allowedMoves = this.showAllowedMove(row, col)
+            .filter(move => {
+                return move.capture === false;
+            })
+        if (allowedMoves.some(move => move.row === row && move.col === col)) {
+            return true;
+        }
+        return false;
     }
 
     canCaptureAt(row, col) {
-        return true;
+        let allowedMoves = this.showAllowedMove(row, col)
+            .filter(move => {
+                return move.capture === true;
+            })
+        if (allowedMoves.some(move => move.row === row && move.col === col)) {
+            return true;
+        }
+        return false;
     }
 
     showAllowedMove() {
@@ -72,6 +86,7 @@ class Pawn extends Piece {
     }
 
     moveTo(row, col) {
+        
         if (row != this.row || col != this.col) {
             if (row == enpassantPosition.row && col == enpassantPosition.col) {
                 getCell(row + (this.color == "W" ? 1 : -1), col).getElementsByClassName("piece")[0].remove();
@@ -92,6 +107,7 @@ class Pawn extends Piece {
             if (row == (this.color == "W" ? 0 : 7)) {
                 console.log(999)
                 this.promote();
+                this.element.remove();
             }
         }
     }
@@ -762,17 +778,6 @@ let enpassantPosition = {row: null, col: null};
 function getCell(row, col) {
     return document.querySelector(`.cell[data-row='${row}'][data-col='${col}']`);
 }
-const pieces = [];
-let locations = [];
-
-function getAllPiecesLocation() {
-    let arr = [];
-    pieces.forEach(piece => {
-        arr.push({ type: piece.type, color: piece.color, row: piece.row, col: piece.col });
-    });
-    locations = arr;
-    console.log(locations)
-}
 
 document.addEventListener("DOMContentLoaded", () => {
     const board = document.getElementById("board");
@@ -794,6 +799,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function initializePieces() {
+        const pieces = [];
         pieces.push(new Rook("B", 0, 0));
         pieces.push(new Knight("B", 0, 1));
         pieces.push(new Bishop("B", 0, 2));
@@ -837,17 +843,20 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         const droppedRow = parseInt(this.dataset.row);
         const droppedCol = parseInt(this.dataset.col);
+        if (draggedPiece && draggedPiece.canCaptureAt(droppedRow, droppedCol)) {
+            const cell = getCell(droppedRow, droppedCol);
+            console.log("test")
+            cell.getElementsByClassName('piece')[0].remove();
+            draggedPiece.moveTo(droppedRow, droppedCol);
+            cell.appendChild(draggedPiece.element);
+            getAllPiecesLocation();
+        }
         if (draggedPiece && draggedPiece.canMoveTo(droppedRow, droppedCol)) {
             draggedPiece.moveTo(droppedRow, droppedCol);
             this.appendChild(draggedPiece.element);
             getAllPiecesLocation();
         }
-        if (draggedPiece && draggedPiece.canCaptureAt(droppedRow, droppedCol)) {
-            const cell = getCell(droppedRow, droppedCol);
-            cell.getElementsByClassName('piece')[0].remove();
-            cell.appendChild(draggedPiece.element);
-            getAllPiecesLocation();
-        }
+       
         draggedPiece = null;
         let cells = document.querySelectorAll(".moveable-icon");
         cells.forEach(cell => {
@@ -858,6 +867,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cells.forEach(cell => {
             cell.remove();
         });
+        console.log(getAllPiecesLocation());
     }
 
     

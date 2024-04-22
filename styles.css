@@ -1,7 +1,7 @@
 .board {
     display: grid;
-    grid-template-columns: repeat(8, 50px);
-    grid-template-rows: repeat(8, 50px);
+    grid-template-columns: repeat(8, 75px);
+    grid-template-rows: repeat(8, 75px);
 }
 
 .cell {
@@ -19,18 +19,18 @@
 }
 
 .moveable-icon {
-    width: 15px;
-    height: 15px;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     background-color: gray;
     position: absolute;
 }
 
 .captureable-icon {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     background-color: transparent;
-    border: 5px solid gray;
+    border: 8px solid gray;
     position: absolute;
 }
