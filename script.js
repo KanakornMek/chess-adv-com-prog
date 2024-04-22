@@ -105,7 +105,6 @@ class Pawn extends Piece {
             this.element.dataset.row = row;
             this.element.dataset.col = col;
             if (row == (this.color == "W" ? 0 : 7)) {
-                console.log(999)
                 this.promote();
                 this.element.remove();
             }
@@ -228,8 +227,7 @@ class Rook extends Piece {
                 }
             }
         }
-        console.log(allowedMoves);
-        console.log(getCell(this.row, this.col).getElementsByClassName('piece')[0].dataset)
+       
         return allowedMoves;
     }
 }
@@ -265,7 +263,6 @@ class Knight extends Piece {
                 }
             }
         })
-        console.log(allowedMoves);
         return allowedMoves;
     }
 }
@@ -332,7 +329,6 @@ class Bishop extends Piece {
             }
             c--;
         }
-        console.log(allowedMoves);
         return allowedMoves;
     }
 }
@@ -451,7 +447,6 @@ class Queen extends Piece {
                 }
             }
         }
-        console.log(allowedMoves);
         return allowedMoves;
     }
 }
@@ -845,16 +840,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const droppedCol = parseInt(this.dataset.col);
         if (draggedPiece && draggedPiece.canCaptureAt(droppedRow, droppedCol)) {
             const cell = getCell(droppedRow, droppedCol);
-            console.log("test")
             cell.getElementsByClassName('piece')[0].remove();
             draggedPiece.moveTo(droppedRow, droppedCol);
             cell.appendChild(draggedPiece.element);
-            getAllPiecesLocation();
         }
         if (draggedPiece && draggedPiece.canMoveTo(droppedRow, droppedCol)) {
             draggedPiece.moveTo(droppedRow, droppedCol);
             this.appendChild(draggedPiece.element);
-            getAllPiecesLocation();
         }
        
         draggedPiece = null;
@@ -867,7 +859,6 @@ document.addEventListener("DOMContentLoaded", () => {
         cells.forEach(cell => {
             cell.remove();
         });
-        console.log(getAllPiecesLocation());
     }
 
     
