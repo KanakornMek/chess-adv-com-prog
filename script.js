@@ -766,6 +766,7 @@ class King extends Piece {
 
 }
 
+
 let draggedPiece = null;
 let prevDragOverCell = null;
 let enpassantPosition = { row: null, col: null };
@@ -810,8 +811,11 @@ function parseLongAlgebraicNotation(longAlgebraicNotation) {
     };
 }
 
+
 const pieces = [];
 let turn = true;
+let isGameOver = false;
+
 document.addEventListener("DOMContentLoaded", () => {
     const board = document.getElementById("board");
 
@@ -873,6 +877,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function handleDrop(event) {
         event.preventDefault();
+        isGameOver = new Chess(fen).game_over();
+        if(isGameOver){
+            console.log("Game Over");
+            let GameOverDiv = document.createElement("div")
+            GameOverDiv.innerHTML = "Game Over";
+            document.body.appendChild(GameOverDiv);
+            return;
+        }
         if (turn) {
             let moveFlag = false;
             const droppedRow = parseInt(this.dataset.row);
@@ -884,6 +896,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 const index = pieces.findIndex(piece => piece === draggedPiece);
                 if (index !== -1) {
                     pieces.splice(index, 1);
+                }
+                let chess = new Chess(fen)
+                chess.move({from: convertToChessNotation(draggedPiece.row, draggedPiece.col), to: convertToChessNotation(droppedRow, droppedCol)})
+                if(chess.in_check()){
+                    return;
                 }
                 cell.getElementsByClassName('piece')[0].remove();
                 draggedPiece.moveTo(droppedRow, droppedCol);
@@ -897,8 +914,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (index !== -1) {
                     pieces.splice(index, 1);
                 }
+                let chess = new Chess(fen)
+                chess.move({from: convertToChessNotation(draggedPiece.row, draggedPiece.col), to: convertToChessNotation(droppedRow, droppedCol)})
+                if(chess.in_check()){
+                    return;
+                }
                 draggedPiece.moveTo(droppedRow, droppedCol);
                 pieces.push(draggedPiece);
+                
                 this.appendChild(draggedPiece.element);
                 moveFlag = true;
             }
