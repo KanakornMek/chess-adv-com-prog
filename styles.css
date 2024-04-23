@@ -34,3 +34,7 @@
     border: 8px solid gray;
     position: absolute;
 }
+
+.checked {
+    background-color: coral !important;
+}
