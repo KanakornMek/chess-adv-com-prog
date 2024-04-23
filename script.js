@@ -123,7 +123,9 @@ class Pawn extends Piece {
             const newRow = this.row - moveRow;
             const newCol = this.col + value;
             if (newRow == enpassantPosition.row && newCol == enpassantPosition.col) {
-                allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                if (getCell(this.row, newCol).getElementsByClassName("piece").length != 0) {
+                    allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                }
             }
         }
 
@@ -622,7 +624,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N","P","B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -635,7 +637,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N","P","B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -648,7 +650,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N","P","B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -661,7 +663,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N","P","B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -678,7 +680,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N","P","R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
@@ -697,7 +699,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N","P","R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
@@ -716,7 +718,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N","P","R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
@@ -735,7 +737,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N","P","R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
