@@ -891,10 +891,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    
+
 
     async function updateEvalChart(fen) {
-        fetch("http://localhost:3000/eval", {
+        let res = await fetch("http://localhost:3000/eval", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -902,12 +902,11 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify({
                 fen
             })
-        }).then((res) => res.json())
-            .then((data) => {
-                if(!isGameOver)
-                    evalArr.push(data.eval);
-            })
+        });
 
+        let data = await res.json()
+        if (!isGameOver)
+            evalArr.push(data.eval);
         console.log(evalArr)
     }
 
@@ -934,10 +933,13 @@ document.addEventListener("DOMContentLoaded", () => {
             let moveFlag = false;
             const droppedRow = parseInt(this.dataset.row);
             const droppedCol = parseInt(this.dataset.col);
+            const draggedRow = parseInt(draggedPiece.row);
+            const draggedCol = parseInt(draggedPiece.col);
             const chessNotation = convertToLongAlgebraicNotation(draggedPiece.row, draggedPiece.col, droppedRow, droppedCol);
             let chess = new Chess(fen)
+            console.log(fen);
             chess.move({ from: convertToChessNotation(draggedPiece.row, draggedPiece.col), to: convertToChessNotation(droppedRow, droppedCol) })
-
+            console.log(chess.fen())
             if (chess.in_check()) {
                 return;
             }
@@ -973,8 +975,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 checkedCell.forEach(cell => {
                     cell.classList.remove("checked");
                 })
+                let cells = document.querySelectorAll(".moveable-icon");
+                cells.forEach(cell => {
+                    cell.remove();
+                });
 
-                updateEvalChart(fen);
+                cells = document.querySelectorAll(".captureable-icon");
+                cells.forEach(cell => {
+                    cell.remove();
+                });
+                let chess = new Chess(fen)
+                console.log(fen);
+                console.log(draggedPiece.row, draggedPiece.col, droppedRow, droppedCol)
+                chess.move({ from: convertToChessNotation(draggedRow, draggedCol), to: convertToChessNotation(droppedRow, droppedCol) })
+                console.log(chess.fen())
+                await updateEvalChart(chess.fen());
 
 
                 fetch("http://localhost:3000/botmove", {
@@ -1036,8 +1051,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             if (chessBotTurn.in_check()) {
                                 kingCell.classList.add("checked")
                             }
-
-                            updateEvalChart(fen);
+                            console.log(fen)
+                            await updateEvalChart(fen);
 
                         })
                     );
@@ -1045,15 +1060,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
         draggedPiece = null;
-        let cells = document.querySelectorAll(".moveable-icon");
-        cells.forEach(cell => {
-            cell.remove();
-        });
 
-        cells = document.querySelectorAll(".captureable-icon");
-        cells.forEach(cell => {
-            cell.remove();
-        });
 
     }
 
@@ -1069,4 +1076,115 @@ function range(start, end) {
         arr.push(i);
     }
     return arr;
+}
+
+function getMoveType(evaluation) {
+    let bMove = [0, 0, 0, 0, 0, 0], wMove = [0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < evaluation.length; i++) {
+        if (i == 0) {
+            diff = 0 - evaluation[i];
+            if (diff > 0.2) {
+                wMove[5] += 1
+            }
+            else if (diff > 0.1) {
+                wMove[4] += 1
+            }
+            else if (diff > 0.05) {
+                wMove[3] += 1
+            }
+            else if (diff > 0.02) {
+                wMove[2] += 1
+            }
+            else if (diff > 0.00) {
+                wMove[1] += 1
+            }
+            else {
+                wMove[0] += 1
+            }
+        }
+        else if (i % 2 == 0) {
+            diff = evaluation[i - 1] - evaluation[i];
+            if (diff > 0.2) {
+                wMove[5] += 1
+            }
+            else if (diff > 0.1) {
+                wMove[4] += 1
+            }
+            else if (diff > 0.05) {
+                wMove[3] += 1
+            }
+            else if (diff > 0.02) {
+                wMove[2] += 1
+            }
+            else if (diff > 0.00) {
+                wMove[1] += 1
+            }
+            else {
+                wMove[0] += 1
+            }
+        }
+        else if (i % 2 == 1) {
+            diff = evaluation[i] - evaluation[i - 1];
+            if (diff > 0.2) {
+                bMove[5] += 1
+            }
+            else if (diff > 0.1) {
+                bMove[4] += 1
+            }
+            else if (diff > 0.05) {
+                bMove[3] += 1
+            }
+            else if (diff > 0.02) {
+                bMove[2] += 1
+            }
+            else if (diff > 0.00) {
+                bMove[1] += 1
+            }
+            else {
+                bMove[0] += 1
+            }
+        }
+
+    }
+    console.log(wMove, bMove)
+    return { wMove: wMove, bMove: bMove }
+}
+
+let moveChart = document.getElementById("moveChart")
+function ShowMoveChart() {
+    const data = {
+        labels: ["Best", "Excellent", "Good", "Inaccuracy", "Mistake", "Blunder"],
+        datasets: [
+            {
+                label: "White",
+                data: getMoveType(evalArr).wMove,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ]
+            },
+            {
+                label: "Black",
+                data: getMoveType(evalArr).bMove,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(75, 192, 192, 0.2)',
+                    'rgba(153, 102, 255, 0.2)',
+                    'rgba(255, 159, 64, 0.2)'
+                ]
+            }
+        ]
+    }
+    const config = {
+        type: "bar",
+        data: data,
+    }
+    moveChart = new Chart(moveChart, config)
+
 }
