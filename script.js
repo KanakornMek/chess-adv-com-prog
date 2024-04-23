@@ -123,7 +123,9 @@ class Pawn extends Piece {
             const newRow = this.row - moveRow;
             const newCol = this.col + value;
             if (newRow == enpassantPosition.row && newCol == enpassantPosition.col) {
-                allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                if (getCell(this.row, newCol).getElementsByClassName("piece").length != 0) {
+                    allowedMoves.push({ row: newRow, col: newCol, capture: true });
+                }
             }
         }
 
@@ -622,7 +624,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N", "P", "B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -635,7 +637,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N", "P", "B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -648,7 +650,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N", "P", "B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -661,7 +663,7 @@ class King extends Piece {
             if (pieceInWay.length != 0) {
                 if (pieceInWay[0].dataset.color == kingColor) {
                     break;
-                } else if (["N", "P", "B"].includes(pieceInWay[0].dataset.type)) {
+                } else if (["N", "P", "B","K"].includes(pieceInWay[0].dataset.type)) {
                     break;
                 } else if (["Q", "R"].includes(pieceInWay[0].dataset.type)) {
                     return true;
@@ -678,7 +680,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N", "P", "R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
@@ -697,7 +699,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N", "P", "R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
@@ -716,7 +718,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N", "P", "R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
@@ -735,7 +737,7 @@ class King extends Piece {
                     let pieceInWay = getCell(newRow, newCol).getElementsByClassName("piece");
                     if (pieceInWay[0].dataset.color == kingColor) {
                         break;
-                    } else if (["N", "P", "R"].includes(pieceInWay[0].dataset.type)) {
+                    } else if (["N", "P", "R","K"].includes(pieceInWay[0].dataset.type)) {
                         break;
                     } else if (["Q", "B"].includes(pieceInWay[0].dataset.type)) {
                         return true;
@@ -819,6 +821,9 @@ let isGameOver = false;
 let chart;
 
 function handleGetEvalChart() {
+    if(chart) {
+        chart.destroy();
+    }
     chart = new Chart(document.getElementById('evalChart'), {
         type: 'line',
         data: {
@@ -849,7 +854,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let j = 0; j < 8; j++) {
                 const cell = document.createElement("div");
                 cell.classList.add("cell");
-                cell.style.backgroundColor = ((i + j) % 2 === 0 ? "#b58863" : "#f0d9b5")
+                cell.style.backgroundColor = ((i + j) % 2 === 0 ? "#f0d9b5" : "#b58863")
                 cell.dataset.row = i;
                 cell.dataset.col = j;
                 cell.addEventListener("click", handleCellClick);
@@ -924,8 +929,13 @@ document.addEventListener("DOMContentLoaded", () => {
         isGameOver = new Chess(fen).game_over();
         if (isGameOver) {
             console.log("Game Over");
-            let GameOverDiv = document.createElement("div")
-            GameOverDiv.innerHTML = "Game Over";
+            let GameOverDiv = document.createElement("div");
+            GameOverDiv.classList.add("gameover");
+            let h1 = document.createElement("h1")
+            h1.innerHTML = "Game Over";
+            h1.style.fontSize = "50px";
+            h1.style.color = "white";
+            GameOverDiv.appendChild(h1);
             document.body.appendChild(GameOverDiv);
             return;
         }
@@ -969,27 +979,41 @@ document.addEventListener("DOMContentLoaded", () => {
                 this.appendChild(draggedPiece.element);
                 moveFlag = true;
             }
+            let checkedCell = document.querySelectorAll(".checked")
+            checkedCell.forEach(cell => {
+                cell.classList.remove("checked");
+            })
+            let cells = document.querySelectorAll(".moveable-icon");
+            cells.forEach(cell => {
+                cell.remove();
+            });
+
+            cells = document.querySelectorAll(".captureable-icon");
+            cells.forEach(cell => {
+                cell.remove();
+            });
             if (moveFlag) {
                 turn = false;
-                let checkedCell = document.querySelectorAll(".checked")
-                checkedCell.forEach(cell => {
-                    cell.classList.remove("checked");
-                })
-                let cells = document.querySelectorAll(".moveable-icon");
-                cells.forEach(cell => {
-                    cell.remove();
-                });
-
-                cells = document.querySelectorAll(".captureable-icon");
-                cells.forEach(cell => {
-                    cell.remove();
-                });
+                
                 let chess = new Chess(fen)
                 console.log(fen);
                 console.log(draggedPiece.row, draggedPiece.col, droppedRow, droppedCol)
                 chess.move({ from: convertToChessNotation(draggedRow, draggedCol), to: convertToChessNotation(droppedRow, droppedCol) })
                 console.log(chess.fen())
-                await updateEvalChart(chess.fen());
+                let highbotMove = await fetch("http://localhost:3000/botmove", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        move: chessNotation,
+                        fen,
+                    })
+                })
+
+                highbotMove = await highbotMove.json()
+                whiteFen = highbotMove.fen;
+                await updateEvalChart(whiteFen, false);
 
 
                 fetch("http://localhost:3000/botmove", {
@@ -1052,7 +1076,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 kingCell.classList.add("checked")
                             }
                             console.log(fen)
-                            await updateEvalChart(fen);
+                            await updateEvalChart(fen, true);
 
                         })
                     );
@@ -1151,7 +1175,11 @@ function getMoveType(evaluation) {
 }
 
 let moveChart = document.getElementById("moveChart")
+let moveCtx;
 function ShowMoveChart() {
+    if(moveCtx) {
+        moveCtx.destroy();
+    }
     const data = {
         labels: ["Best", "Excellent", "Good", "Inaccuracy", "Mistake", "Blunder"],
         datasets: [
@@ -1160,23 +1188,13 @@ function ShowMoveChart() {
                 data: getMoveType(evalArr).wMove,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
                 ]
             },
             {
                 label: "Black",
                 data: getMoveType(evalArr).bMove,
                 backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
                 ]
             }
         ]
@@ -1185,6 +1203,6 @@ function ShowMoveChart() {
         type: "bar",
         data: data,
     }
-    moveChart = new Chart(moveChart, config)
+    moveCtx = new Chart(moveChart, config)
 
 }

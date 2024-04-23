@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Chess Game</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+    </style>
 </head>
+
 <body>
-    <div class="board" id="board"></div>
-    <div>
-        <canvas id="evalChart"></canvas>
-        <canvas id="moveChart"></canvas>
+    <h1 style="text-align: center;">Best Chess Game</h1>
+    <div class="container">
+        <div class="board" id="board"></div>
+        <div>
+            <button onclick="handleGetEvalChart()">Evaluation Chart</button>
+            <button onclick="ShowMoveChart()">Move Chart</button>
+        </div>
+    </div>
+    <div style="display: flex; width: 90vw; justify-content: space-between;">
+        <div style="width: 42vw">
+            <canvas id="evalChart"></canvas>
+        </div>
+        <div style="width: 42vw">
+            <canvas id="moveChart"></canvas>
+        </div>
+
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.9.4/chess.min.js"></script>
     <script src="script.js"></script>
-    <button onclick="handleGetEvalChart()">Evaluation Chart</button>
-    <button onclick="ShowMoveChart()">Move Chart</button>
+
 </body>
+
 </html>
