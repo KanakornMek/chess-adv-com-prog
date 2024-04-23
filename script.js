@@ -813,8 +813,33 @@ function parseLongAlgebraicNotation(longAlgebraicNotation) {
 
 
 const pieces = [];
+let evalArr = [];
 let turn = true;
 let isGameOver = false;
+let chart;
+
+function handleGetEvalChart() {
+    chart = new Chart(document.getElementById('evalChart'), {
+        type: 'line',
+        data: {
+            labels: evalArr.map((val, idx) => idx),
+            datasets: [{
+                label: 'Evaluation',
+                data: evalArr,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                fill: 'end'
+            }],
+        },
+        options: {
+            yAxes: [{
+                ticks: {
+                    max: Math.max(...evalArr)
+                }
+            }]
+        }
+    })
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     const board = document.getElementById("board");
@@ -866,6 +891,26 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    
+
+    async function updateEvalChart(fen) {
+        fetch("http://localhost:3000/eval", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                fen
+            })
+        }).then((res) => res.json())
+            .then((data) => {
+                if(!isGameOver)
+                    evalArr.push(data.eval);
+            })
+
+        console.log(evalArr)
+    }
+
     function handleCellClick() {
         const selectedCell = this;
         console.log("Clicked on cell:", selectedCell.dataset.row, selectedCell.dataset.col);
@@ -875,10 +920,10 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
     }
 
-    function handleDrop(event) {
+    async function handleDrop(event) {
         event.preventDefault();
         isGameOver = new Chess(fen).game_over();
-        if(isGameOver){
+        if (isGameOver) {
             console.log("Game Over");
             let GameOverDiv = document.createElement("div")
             GameOverDiv.innerHTML = "Game Over";
@@ -890,6 +935,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const droppedRow = parseInt(this.dataset.row);
             const droppedCol = parseInt(this.dataset.col);
             const chessNotation = convertToLongAlgebraicNotation(draggedPiece.row, draggedPiece.col, droppedRow, droppedCol);
+            let chess = new Chess(fen)
+            chess.move({ from: convertToChessNotation(draggedPiece.row, draggedPiece.col), to: convertToChessNotation(droppedRow, droppedCol) })
+
+            if (chess.in_check()) {
+                return;
+            }
 
             if (draggedPiece && draggedPiece.canCaptureAt(droppedRow, droppedCol)) {
                 const cell = getCell(droppedRow, droppedCol);
@@ -897,11 +948,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (index !== -1) {
                     pieces.splice(index, 1);
                 }
-                let chess = new Chess(fen)
-                chess.move({from: convertToChessNotation(draggedPiece.row, draggedPiece.col), to: convertToChessNotation(droppedRow, droppedCol)})
-                if(chess.in_check()){
-                    return;
-                }
+
                 cell.getElementsByClassName('piece')[0].remove();
                 draggedPiece.moveTo(droppedRow, droppedCol);
                 pieces.push(draggedPiece);
@@ -914,19 +961,22 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (index !== -1) {
                     pieces.splice(index, 1);
                 }
-                let chess = new Chess(fen)
-                chess.move({from: convertToChessNotation(draggedPiece.row, draggedPiece.col), to: convertToChessNotation(droppedRow, droppedCol)})
-                if(chess.in_check()){
-                    return;
-                }
                 draggedPiece.moveTo(droppedRow, droppedCol);
                 pieces.push(draggedPiece);
-                
+
                 this.appendChild(draggedPiece.element);
                 moveFlag = true;
             }
             if (moveFlag) {
                 turn = false;
+                let checkedCell = document.querySelectorAll(".checked")
+                checkedCell.forEach(cell => {
+                    cell.classList.remove("checked");
+                })
+
+                updateEvalChart(fen);
+
+
                 fetch("http://localhost:3000/botmove", {
                     method: "POST",
                     headers: {
@@ -938,12 +988,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     })
                 })
                     .then((res) => res.json()
-                        .then((data) => {
+                        .then(async (data) => {
                             fen = data.fen;
                             let { start: startCell, end: endCell } = parseLongAlgebraicNotation(data.bestMove)
                             let botPiece = getCell(startCell.row, startCell.col).getElementsByClassName('piece')[0];
                             const index = pieces.findIndex(piece => piece.row === startCell.row && piece.col === startCell.col);
-    
+
                             let botPieceInArray = pieces[index];
                             console.log(pieces[index]);
                             let newPiece;
@@ -980,10 +1030,19 @@ document.addEventListener("DOMContentLoaded", () => {
                             botPiece.remove();
                             console.log(pieces)
                             turn = true;
+                            let chessBotTurn = new Chess(fen)
+                            const kingIndex = pieces.findIndex(piece => piece.type === "K" && piece.color === "W");
+                            let kingCell = getCell(pieces[kingIndex].row, pieces[kingIndex].col)
+                            if (chessBotTurn.in_check()) {
+                                kingCell.classList.add("checked")
+                            }
+
+                            updateEvalChart(fen);
+
                         })
                     );
             }
-    
+
         }
         draggedPiece = null;
         let cells = document.querySelectorAll(".moveable-icon");
